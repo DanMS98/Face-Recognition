@@ -10,12 +10,14 @@ from scipy.spatial.distance import cosine
 
 
 class FaceDetector:
-    def __init__(self, use_cascade=False):
-        self.path_to_model_weights = "facenet_keras_weights.h5"
-        self.path_to_encodings_dictionary = 'encodings/encodings.pkl'
+    def __init__(self, path_to_weights, path_to_encodings_database, use_cascade=False):
+        self.path_to_model_weights = path_to_weights
+        self.path_to_encodings_dictionary = path_to_encodings_database
         self.ROI_SIZE = (255, 255)
+        self.MIN_FACE_THRESHOLD = 0.6
+        self.DISPLAY_TIME = 1  # Updates FPS. (sec)
         self.using_cascade = False
-        self.using_ssd = False
+        self.using_ssd = True
         if use_cascade:
             self.using_cascade = True
             import os
@@ -29,6 +31,10 @@ class FaceDetector:
                 model_selection=1,
                 min_detection_confidence=0.9
             )
+        self.mp_hand = mp.solutions.hands.Hands(
+            max_num_hands=2,
+            min_detection_confidence=0.5
+        )
         self._load_encoder_and_encodings()
 
     def _load_encoder_and_encodings(self):
@@ -89,6 +95,9 @@ class FaceDetector:
         while ret:
             faces = {}
             frame_counter += 1
+
+            # hand_results = self.mp_hand.process(frame)
+
             if self.using_cascade:
                 frame, faces = self._cascade_process(frame)
 
@@ -105,7 +114,7 @@ class FaceDetector:
                 name = 'unknown'
                 for db_name, db_encode in self.encoding_dict.items():
                     dist = cosine(db_encode, face_encoding)
-                    if dist < 0.6 and dist < distance:
+                    if dist < self.MIN_FACE_THRESHOLD and dist < distance:
                         name = db_name
                         distance = dist
                 if name == 'unknown':
@@ -113,8 +122,16 @@ class FaceDetector:
                 else:
                     cv2.putText(frame, name, loc, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1)
 
+            # if hand_results.multi_hand_landmarks:
+            #     for hand_landmarks in hand_results.multi_hand_landmarks:
+            #         self.mp_drawing.draw_landmarks(
+            #             frame,
+            #             hand_landmarks,
+            #             # self.mp_hand.HAND_CONNECTIONS,
+            #         )
+
             time_dif = time.time() - prev_time
-            if time_dif >= DISPLAY_TIME:
+            if time_dif >= self.DISPLAY_TIME:
                 fps = frame_counter / time_dif
                 frame_counter = 0
                 disp = "FPS: " + str(fps)[:5]
@@ -151,9 +168,11 @@ class FaceDetector:
 
             cv2.imshow("output", frame)
             cv2.waitKey(0)
-            for i, face in enumerate(faces):
-                cv2.imshow("face", face)
+            i = 0
+            for loc, face in faces.items():
                 filename = f'face{i}.jpg'
+                i = i+1
+                cv2.imshow(filename, face)
                 cv2.imwrite(filename, face)
                 cv2.waitKey(0)
         cv2.destroyAllWindows()
@@ -168,8 +187,8 @@ if __name__ == "__main__":
 
     USE_VIDEO = True if args.use_vid == 1 else False
     USE_CASCADE = False  # Uses classic haar solution, otherwise uses mediapipe mobile net
-    DISPLAY_TIME = 1  # Updates FPS. (sec)
-    detector = FaceDetector(USE_CASCADE)
+
+    detector = FaceDetector('facenet_keras_weights.h5', 'encodings/encodings.pkl', USE_CASCADE)
     if USE_VIDEO:
         detector.detect_from_video()
     else:

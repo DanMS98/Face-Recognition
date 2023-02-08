@@ -6,7 +6,6 @@ import cv2
 import pickle
 import numpy as np
 from sklearn.preprocessing import Normalizer
-from tensorflow.keras.models import load_model
 
 face_data = 'faces_database/'
 required_shape = (160, 160)
