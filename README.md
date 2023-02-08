@@ -3,6 +3,7 @@
 This face recognition project uses mediapipe and FaceNet to detect and recognize faces that it sees in a video stream or a static image. 
 Media pipe uses a simple and fast SSD network to detect faces and then, the faces go through the FaceNet network and will be transformed into 128-dimensional vectors.
 We then simply use these vectors to identify the faces we previously passed through the network.
+![cover](./docs/images/facenet-brki.png)
 
 ## Packages 
 To run this project you need TensorFlow >= 2.2 and mediapipe installed. Go ahead and create a virtual environment and install the following packages:
