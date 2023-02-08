@@ -49,4 +49,6 @@ Originally FaceNet was trained on TensorFlow 1.3.0 old pre-trained models were i
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See `LICENSE.md` for more information.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
