@@ -158,7 +158,7 @@ class FaceDetector:
 
     def detect_from_image(self):
         path = args.pic_path
-        print(path)
+        # print(path)
         frame = cv2.imread(path)
         if self.using_cascade:
             frame, faces = self.cascade_process(frame)

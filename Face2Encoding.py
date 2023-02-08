@@ -40,5 +40,6 @@ for face_names in os.listdir(face_data):
         encoding_dict[face_names] = encode
 
 path = 'encodings/encodings.pkl'
+print(encoding_dict)
 with open(path, 'wb') as file:
     pickle.dump(encoding_dict, file)
