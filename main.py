@@ -3,12 +3,17 @@ import cv2
 import numpy as np
 import mediapipe as mp
 from argparse import ArgumentParser
+from Face2Encoding import normalize
+from inceptionresnet import InceptionResNetV2
+import pickle
+from scipy.spatial.distance import cosine
 
 
 def mp_to_pix(mp_x, mp_y, mp_width, mp_height, frame_width, frame_heigth):
     x, y = int(mp_x * frame_width), int(mp_y * frame_heigth)
     width, height = int(mp_width * frame_w), int(mp_height * frame_h)
     return x, y, width, height
+
 
 def mp_process(frame, mp_face):
     disp = ""
@@ -31,6 +36,7 @@ def mp_process(frame, mp_face):
             mp_drawing.draw_detection(frame, detection)
     return frame, faces, disp
 
+
 def cascade_process(frame, faceCascade):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = faceCascade.detectMultiScale(
@@ -45,9 +51,19 @@ def cascade_process(frame, faceCascade):
     return frame
 
 
+def load_encoder_and_encodings():
+    face_encoder = InceptionResNetV2()
+    path_m = "facenet_keras_weights.h5"
+    face_encoder.load_weights(path_m)
+    encodings_path = 'encodings/encodings.pkl'
+    with open(encodings_path, 'rb') as f:
+        encoding_dict = pickle.load(f)
+    return face_encoder, encoding_dict
+
+
 parser = ArgumentParser()
 parser.add_argument('--pic_path', type=str, default="pic.jpg")
-parser.add_argument('--use_vid', type=int, default=0)
+parser.add_argument('--use_vid', type=int, default=1)
 args = parser.parse_args()
 
 print(args.use_vid)
@@ -56,6 +72,7 @@ USE_CASCADE = False  # Uses classic haar solution
 USE_LANDMARK = True  # Uses mediapipe mobile net
 DISPLAY_TIME = 1  # Updates FPS. (sec)
 ROI_SIZE = (255, 255)
+face_encoder, faces_dict = load_encoder_and_encodings()
 
 if USE_LANDMARK:
     mp_drawing = mp.solutions.drawing_utils
@@ -92,6 +109,23 @@ if USE_VIDEO:
             frame, faces, _ = mp_process(frame, mp_face)
             if len(faces) == 0:
                 disp = "No Face Detected"
+
+            ##TODO: get this part out of this scope
+            if len(faces) != 0:
+                face = faces[0]
+                face = normalize(face)
+                face = cv2.resize(face, (160, 160))
+                face_encoding = face_encoder.predict(np.expand_dims(face, axis=0))[0]
+                distance = float("inf")
+                name = 'unknown'
+                for db_name, db_encode in faces_dict.items():
+                    dist = cosine(db_encode, face_encoding)
+                    if dist < 0.6 and dist < distance:
+                        name = db_name
+                        distance = dist
+                print(name)
+
+
 
         time_dif = time.time() - prev_time
         if time_dif >= DISPLAY_TIME:

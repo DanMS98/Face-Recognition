@@ -3,3 +3,4 @@ Pipfile
 *.h5
 *.json
 *.jpg
+*.pt
