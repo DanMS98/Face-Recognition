@@ -41,7 +41,7 @@ python3 Face2Encoding.py
 ### Run using a webcam or a static image
 Finally, you can use the `main.py` file to detect faces using your webcam
 ```sh
-python3 Face2Encoding.py
+python3 main.py
 ```
 
 ## Acknowledgments
