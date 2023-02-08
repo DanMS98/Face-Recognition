@@ -20,6 +20,9 @@ Alternatively, you can use the requirement.txt file to install the necessary pac
 ```sh
 pip install -r requirements.txt
 ```
+## Demo
+A qucik demo of the project: <br />
+![demo](./docs/gifs/demo.gif)
 
 ## Usage
 ### Creating the database
