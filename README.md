@@ -32,7 +32,7 @@ Alternatively, you can use the `main.py` to get a cropped picture of a face:
 ```sh
 python3 main.py --use_vid 0 --pic_path [path to your picture]
 ```
-This command would find and save faces in your picture for you
+This command would find and save faces in your picture for you. I should note that you can download the model weights at the repo I mentioned at the end of this document.
 ### Creating encodings from pictures
 After you created the faces folders, use the `Face2Encoding.py` to create a dictionary of persons and their respective encoding.
 ```sh
